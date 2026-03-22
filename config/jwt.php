@@ -1,38 +1,21 @@
 <?php
 
 return [
-    'defaults' => [
-        'guard' => 'api',
-        'passwords' => 'users',
+    'secret' => env('JWT_SECRET'),
+    'keys' => [
+        'public' => env('JWT_PUBLIC_KEY'),
+        'private' => env('JWT_PRIVATE_KEY'),
     ],
-
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-
-        'api' => [
-            'driver' => 'jwt',
-            'provider' => 'users',
-        ],
-    ],
-
+    'ttl' => env('JWT_TTL', 60),
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
+    'algo' => env('JWT_ALGORITHM', 'HS256'),
+    'required_claims' => ['iss', 'iat', 'exp', 'nbf', 'sub', 'jti'],
+    'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
+    'blacklist_grace_period' => env('JWT_BLACKLIST_GRACE_PERIOD', 0),
+    'show_black_list_exception' => env('JWT_SHOW_BLACKLIST_EXCEPTION', true),
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
-        ],
+        'jwt' => Tymon\JWTAuth\Providers\JWT\Namshi::class,
+        'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,
+        'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
     ],
-
-    'passwords' => [
-        'users' => [
-            'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
-        ],
-    ],
-
-    'password_timeout' => 10800,
 ];
