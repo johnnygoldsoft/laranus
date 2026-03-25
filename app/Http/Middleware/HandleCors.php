@@ -15,12 +15,26 @@ class HandleCors
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $allowedOrigins = explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000'));
+        $allowedOrigins = array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000')));
         $origin = $request->header('Origin');
 
         // Check if origin is allowed
         $isAllowed = in_array($origin, $allowedOrigins) || in_array('*', $allowedOrigins);
 
+        // Handle preflight requests
+        if ($request->isMethod('OPTIONS')) {
+            if ($isAllowed) {
+                return response()
+                    ->header('Access-Control-Allow-Origin', $origin ?: '*')
+                    ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+                    ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+                    ->header('Access-Control-Allow-Credentials', 'true')
+                    ->header('Access-Control-Max-Age', '86400');
+            }
+            return response('', 403);
+        }
+
+        // Handle actual requests
         if ($isAllowed) {
             return $next($request)
                 ->header('Access-Control-Allow-Origin', $origin ?: '*')
